@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useIntlayer } from "next-intlayer";
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState, useEffect, type KeyboardEvent } from "react";
@@ -18,6 +19,7 @@ import {
   useMfaAttempt,
   type VerificationMethod,
 } from "./mfa-challenge-storage";
+import { AuthPanel } from "./auth-panel";
 import { ExpiredMfaChallenge, MfaChallenge } from "./mfa-challenge";
 
 const modes = ["signIn", "signUp"] as const;
@@ -156,7 +158,7 @@ export function AuthCard({ locale }: { locale: Locale }) {
   }
 
   return (
-    <section className="glassmorphism w-full rounded-[12px] bg-white/[0.03] px-[clamp(24px,4vw,58px)] py-[clamp(30px,4vh,48px)] shadow-[0_30px_40px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.15)]" data-auth-view={attempt ? (attempt.recovery ? "recovery" : attempt.method) : undefined}
+    <AuthPanel data-auth-view={attempt ? (attempt.recovery ? "recovery" : attempt.method) : undefined}
       aria-labelledby={`${id}-heading`}>
       {attempt ? (
         <MfaChallenge
@@ -216,7 +218,8 @@ export function AuthCard({ locale }: { locale: Locale }) {
                       autoComplete="new-password" readOnly={busy} visibilityLabels={{ show: copy.show.value, hide: copy.hide.value }}
                       {...form.register("confirmPassword")} />
                   ) : (
-                    <button type="button" disabled className="self-start text-sx text-[#bdb2ec]">{copy.forgot}</button>
+                    <Link href={`/${locale}/forgot-password`} className="self-start text-sx text-[#bdb2ec] hover:text-white" aria-disabled={busy || undefined}
+                      onClick={(event) => { if (busy || requestInFlight.current) event.preventDefault(); }}>{copy.forgot.value}</Link>
                   )}
                   {errors.root?.message && (
                     <p role="alert" className="text-sx text-red-200">
@@ -239,7 +242,7 @@ export function AuthCard({ locale }: { locale: Locale }) {
           ))}
         </>
       )}
-    </section>
+    </AuthPanel>
   );
 }
 

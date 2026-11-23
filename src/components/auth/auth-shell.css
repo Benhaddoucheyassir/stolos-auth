@@ -76,3 +76,16 @@
 .stolos-auth-foreground > [data-auth-view="recovery"] {
   margin-block-start: clamp(24px, 5svh, 54px);
 }
+
+
+.stolos-auth-foreground > [data-auth-view="reset-request"] {
+  margin-block-start: clamp(30px, 7.2svh, 78px);
+}
+
+.stolos-auth-foreground > [data-auth-view="reset-confirm"] {
+  margin-block-start: clamp(42px, 12.7svh, 137px);
+}
+
+.stolos-auth-foreground > [data-auth-view="reset-password"] {
+  margin-block-start: clamp(24px, 5.2svh, 56px);
+}
