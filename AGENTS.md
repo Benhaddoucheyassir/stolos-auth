@@ -40,3 +40,8 @@ Per Cas pratique.pdf and README.md, do NOT modify:
 - Provide clear localized loading and server error states even though Figma has no mockups for them. Handle `INVALID_EMAIL_OR_PASSWORD` (401), `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` (422), `INVALID_CODE` (401), `INVALID_TWO_FACTOR_COOKIE` (401), `INVALID_TOKEN` (400), and rate limiting (429).
 - Build the background company cards using the supplied sector list, colors, icons, `SectorTag`, and `CompanyStatus`. Create the server endpoint and its data for the card name, description, sectors, and status. Make the page and fleet overlay responsive and verify at 1920×1080 and 1400×900.
 - Verify the seeded no-MFA, app-only, app + email, and email-only flows using `none@example.com`, `app@example.com`, `both@example.com`, and `email@example.com`. All MFA accounts have recovery codes. See the README for the shared test password.
+
+## Collaboration & Architectural Gate
+- **Propose Before Implementing:** For every task or phase, inspect the relevant files/Figma frames first, then present a concise architectural proposal (folder structure, routing/state strategy, key libraries, and trade-offs) and **wait for my explicit approval** before modifying or creating code.
+- **No Micromanagement Needed:** Derive exact requirements from Cas pratique.pdf, README.md, and Figma rather than waiting to be told implementation details.
+- **Post-Change Walkthrough:** After implementing an approved step, briefly summarize what changed, why each architectural choice was made, and how to test it.

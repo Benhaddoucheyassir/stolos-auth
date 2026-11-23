@@ -1,0 +1,53 @@
+import { t, type Dictionary } from "intlayer";
+import type { CompanyStatus } from "./company-status";
+import type { Sector } from "@/components/sectors/sectors";
+
+export default {
+  key: "company-cards",
+  content: {
+    heading: t({ en: "Companies", fr: "Entreprises" }),
+    loading: t({ en: "Loading companies…", fr: "Chargement des entreprises…" }),
+    error: t({ en: "Companies are currently unavailable.", fr: "Les entreprises sont actuellement indisponibles." }),
+    retry: t({ en: "Retry", fr: "Réessayer" }),
+    sectors: {
+      ARTIFICIAL_INTELLIGENCE: t({ en: "Artificial intelligence", fr: "Intelligence artificielle" }),
+      ECOLOGY: t({ en: "Ecology", fr: "Écologie" }),
+      FINANCE: t({ en: "Finance", fr: "Finance" }),
+      SOFTWARE: t({ en: "Software", fr: "Logiciels" }),
+      SPACE: t({ en: "Space", fr: "Spatial" }),
+      HEALTHCARE: t({ en: "Healthcare", fr: "Santé" }),
+      INDUSTRY: t({ en: "Industry", fr: "Industrie" }),
+      CONSTRUCTION: t({ en: "Construction", fr: "Construction" }),
+      ENERGY: t({ en: "Energy", fr: "Énergie" }),
+      RESOURCES: t({ en: "Resources", fr: "Ressources" }),
+      REAL_ESTATE: t({ en: "Real estate", fr: "Immobilier" }),
+      HOSPITALITY: t({ en: "Hospitality", fr: "Hôtellerie" }),
+      SOCIAL: t({ en: "Social services", fr: "Services sociaux" }),
+      NEW_TECHNOLOGIES: t({ en: "New technologies", fr: "Nouvelles technologies" }),
+      EDUCATION: t({ en: "Education", fr: "Éducation" }),
+      FOOD: t({ en: "Food", fr: "Alimentation" }),
+      AGRICULTURE: t({ en: "Agriculture", fr: "Agriculture" }),
+      SPORTS: t({ en: "Sports", fr: "Sport" }),
+      MEDIA: t({ en: "Media", fr: "Médias" }),
+      COMMUNICATIONS: t({ en: "Communications", fr: "Communication" }),
+      CULTURE: t({ en: "Culture", fr: "Culture" }),
+      ENTERTAINMENT: t({ en: "Entertainment", fr: "Divertissement" }),
+      TRANSPORT: t({ en: "Transport", fr: "Transport" }),
+      COMPUTER_HARDWARE: t({ en: "Computer hardware", fr: "Matériel informatique" }),
+      SERVICES: t({ en: "Services", fr: "Services" }),
+      CONSUMER_GOODS: t({ en: "Consumer goods", fr: "Biens de consommation" }),
+      DISTRIBUTION: t({ en: "Distribution", fr: "Distribution" }),
+      TELECOMMUNICATIONS: t({ en: "Telecommunications", fr: "Télécommunications" }),
+      BIOTECHNOLOGY: t({ en: "Biotechnology", fr: "Biotechnologie" }),
+      WEB3: t({ en: "Web3", fr: "Web3" }),
+      LEGAL: t({ en: "Legal services", fr: "Services juridiques" }),
+      DEFENSE: t({ en: "Defense", fr: "Défense" }),
+    } satisfies Record<Sector, ReturnType<typeof t>>,
+    statuses: {
+      ACTIVE: t({ en: "Active", fr: "Active" }),
+      CLOSED: t({ en: "Closed", fr: "Fermée" }),
+      ACQUIRED: t({ en: "Sold", fr: "Vendue" }),
+      INACTIVE: t({ en: "Closed", fr: "Fermée" }),
+    } satisfies Record<CompanyStatus, ReturnType<typeof t>>,
+  },
+} satisfies Dictionary;
