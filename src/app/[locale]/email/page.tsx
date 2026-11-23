@@ -9,7 +9,7 @@ import { TEST_ACCOUNTS } from "@/lib/test-accounts";
 type SearchParams = Promise<{ account?: string | string[] }>;
 type Preview = { account?: string; link?: string; unavailable?: boolean };
 const previewUrl = "https://app.example.com/reset-password?token=preview";
-const showTestAccounts = process.env.NODE_ENV === "development";
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export default function EmailPage({ params, searchParams }: {
   params: Promise<{ locale: string }>;
@@ -18,9 +18,8 @@ export default function EmailPage({ params, searchParams }: {
   const { locale } = use(params);
   if (!isLocale(locale)) notFound();
 
-  if (!showTestAccounts) return <ResetEmailTemplate locale={locale} />;
   return (
-    <Suspense fallback={<ResetEmailTemplate locale={locale} />}>
+    <Suspense fallback={<ResetEmailTemplate locale={locale} showTestAccounts={isDevelopment} />}>
       <LiveResetEmail locale={locale} searchParams={searchParams} />
     </Suspense>
   );
@@ -28,8 +27,11 @@ export default function EmailPage({ params, searchParams }: {
 
 async function LiveResetEmail({ locale, searchParams }: { locale: Locale; searchParams: SearchParams }) {
   const { account } = await searchParams;
+  const showTestAccounts = isDevelopment || process.env.ENABLE_DEV_MAILBOX === "true";
+  if (!showTestAccounts) return <ResetEmailTemplate locale={locale} />;
+
   const selected = TEST_ACCOUNTS.find((fixture) => fixture.email === account);
-  if (!selected) return <ResetEmailTemplate locale={locale} />;
+  if (!selected) return <ResetEmailTemplate locale={locale} showTestAccounts />;
 
   let preview: Preview = { account: selected.email };
   try {
@@ -52,10 +54,14 @@ async function LiveResetEmail({ locale, searchParams }: { locale: Locale; search
     preview = { ...preview, unavailable: true };
   }
 
-  return <ResetEmailTemplate locale={locale} preview={preview} />;
+  return <ResetEmailTemplate locale={locale} preview={preview} showTestAccounts />;
 }
 
-function ResetEmailTemplate({ locale, preview = {} }: { locale: Locale; preview?: Preview }) {
+function ResetEmailTemplate({ locale, preview = {}, showTestAccounts = false }: {
+  locale: Locale;
+  preview?: Preview;
+  showTestAccounts?: boolean;
+}) {
   const copy = useIntlayer("reset-email", locale);
   const action = "relative rounded-[4px] bg-[#5e4fb0] px-[16px] py-[12px] text-[16px] leading-[20px] text-white/90";
 
