@@ -67,3 +67,12 @@
     display: none;
   }
 }
+
+.stolos-auth-foreground > [data-auth-view="totp"],
+.stolos-auth-foreground > [data-auth-view="otp"] {
+  margin-block-start: clamp(30px, 10svh, 112px);
+}
+
+.stolos-auth-foreground > [data-auth-view="recovery"] {
+  margin-block-start: clamp(24px, 5svh, 54px);
+}

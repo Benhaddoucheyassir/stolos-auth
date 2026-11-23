@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type InputHTMLAttributes, type ReactNode, useId, useState } from "react";
+import { forwardRef, type InputHTMLAttributes, useId, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -9,7 +9,7 @@ export type PasswordInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "type" | "placeholder" | "size"
 > & {
-  label: ReactNode;
+  label: string;
   errorMessage?: string;
   /** Accessible names of the show/hide button, to be translated by the caller. */
   visibilityLabels: { show: string; hide: string };
@@ -39,67 +39,38 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const [isVisible, setIsVisible] = useState(false);
 
     return (
-      <div className={cn("flex w-full flex-col gap-4", className)}>
-        <div
-          className={cn(
-            "group/password relative rounded-sm bg-black/10 font-display",
-            errorMessage && "bg-danger/5",
-          )}
-        >
-          <fieldset
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none absolute -top-2 inset-x-0 bottom-0 min-w-0 rounded-sm border border-white/40 px-3 transition-colors duration-200 group-hover/password:border-white/60 group-focus-within/password:border-white/60 motion-reduce:transition-none",
-              errorMessage
-                && "border-danger group-hover/password:border-danger group-focus-within/password:border-danger",
-            )}
-          >
-            <legend className="invisible h-4 max-w-0 overflow-hidden whitespace-nowrap text-xs leading-4 transition-[max-width] duration-200 group-has-[input:not(:placeholder-shown)]/password:max-w-full motion-reduce:transition-none">
-              <span className="px-1">{label}</span>
-            </legend>
-          </fieldset>
-          <Input
-            {...props}
-            ref={ref}
-            type={isVisible ? "text" : "password"}
-            readOnly={readOnly}
-            disabled={disabled}
-            aria-invalid={errorMessage ? true : props["aria-invalid"]}
-            id={inputId}
-            aria-describedby={
-              [describedBy, errorMessage ? errorId : undefined].filter(Boolean).join(" ") || undefined
-            }
-            placeholder=" "
-            className="w-full gap-4 px-4 py-2.5"
-            inputClassName="h-7 w-full text-lg leading-7 text-white"
-            rightElement={
-              <Button
-                type="button"
-                variant="ghostMonochrome"
-                className="invisible size-6 items-center justify-center rounded-sm p-0 group-has-[input:not(:placeholder-shown)]/password:visible focus-visible:outline focus-visible:outline-white/60"
-                aria-label={isVisible ? visibilityLabels.hide : visibilityLabels.show}
-                aria-pressed={isVisible}
-                aria-controls={inputId}
-                disabled={disabled || readOnly}
-                onClick={() => setIsVisible((visible) => !visible)}
-              >
-                <EyeIcon />
-              </Button>
-            }
-          />
-          <label
-            htmlFor={inputId}
-            className={cn(
-              "absolute top-1/2 left-4 origin-left -translate-y-1/2 cursor-text text-lg leading-7 text-white/40 transition-[top,scale,color] duration-200 ease-out group-hover/password:text-white/60 group-has-[input:not(:placeholder-shown)]/password:top-0 group-has-[input:not(:placeholder-shown)]/password:scale-[0.666667] group-has-[input:not(:placeholder-shown)]/password:text-white/60 motion-reduce:transition-none",
-              errorMessage
-                && "text-danger group-hover/password:text-danger group-has-[input:not(:placeholder-shown)]/password:text-danger",
-            )}
-          >
-            {label}
-          </label>
-        </div>
+      <div className={cn("flex w-full flex-col gap-xs", className)}>
+        <label htmlFor={inputId} className="sr-only">{label}</label>
+        <Input
+          {...props}
+          appearance="auth"
+          ref={ref}
+          type={isVisible ? "text" : "password"}
+          readOnly={readOnly}
+          disabled={disabled}
+          aria-invalid={errorMessage ? true : props["aria-invalid"]}
+          id={inputId}
+          aria-describedby={
+            [describedBy, errorMessage ? errorId : undefined].filter(Boolean).join(" ") || undefined
+          }
+          placeholder={label}
+          rightElement={
+            <Button
+              type="button"
+              variant="ghostMonochrome"
+              className="size-6 items-center justify-center rounded-sm p-0 focus-visible:outline focus-visible:outline-white/60"
+              aria-label={isVisible ? visibilityLabels.hide : visibilityLabels.show}
+              aria-pressed={isVisible}
+              aria-controls={inputId}
+              disabled={disabled || readOnly}
+              onClick={() => setIsVisible((visible) => !visible)}
+            >
+              <EyeIcon />
+            </Button>
+          }
+        />
         {errorMessage && (
-          <p id={errorId} role="alert" className="text-sx text-danger">
+          <p id={errorId} role="alert" className="text-sx text-red-200">
             {errorMessage}
           </p>
         )}

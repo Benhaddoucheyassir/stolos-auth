@@ -11,11 +11,18 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 import type { Locale } from "@/lib/locale";
+import {
+  beginMfaAttempt,
+  saveMfaAttempt,
+  saveResendDeadline,
+  useMfaAttempt,
+  type VerificationMethod,
+} from "./mfa-challenge-storage";
+import { ExpiredMfaChallenge, MfaChallenge } from "./mfa-challenge";
 
 const modes = ["signIn", "signUp"] as const;
 type Mode = (typeof modes)[number];
 type Credentials = { email: string; password: string; confirmPassword: string };
-type VerificationMethod = "totp" | "otp";
 const defaultValues: Credentials = { email: "", password: "", confirmPassword: "" };
 
 export function AuthCard({ locale }: { locale: Locale }) {
@@ -25,7 +32,8 @@ export function AuthCard({ locale }: { locale: Locale }) {
   const tabRefs = useRef<Partial<Record<Mode, HTMLButtonElement>>>({});
   const requestInFlight = useRef(false);
   const [mode, setMode] = useState<Mode>("signIn");
-  const [methods, setMethods] = useState<VerificationMethod[] | null>(null);
+  const attempt = useMfaAttempt();
+  const [mfaExpired, setMfaExpired] = useState(false);
   const [opening, setOpening] = useState(false);
   const [retrySeconds, setRetrySeconds] = useState<number | null>(null);
 
@@ -118,7 +126,9 @@ export function AuthCard({ locale }: { locale: Locale }) {
       if (isSignUp) form.resetField("confirmPassword");
       if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
         const offered = "twoFactorMethods" in data && Array.isArray(data.twoFactorMethods) ? data.twoFactorMethods : [];
-        setMethods(offered.filter((value): value is VerificationMethod => value === "totp" || value === "otp"));
+        const methods = [...new Set(offered.filter((value): value is VerificationMethod => value === "totp" || value === "otp"))];
+        if (methods.length) beginMfaAttempt(methods);
+        else form.setError("root", { message: copy.genericError.value });
         return;
       }
       if (!data) {
@@ -134,17 +144,38 @@ export function AuthCard({ locale }: { locale: Locale }) {
     }
   };
 
+  function clearChallenge() {
+    if (attempt) saveResendDeadline(attempt.id, 0);
+    saveMfaAttempt(null);
+  }
+
+  function returnToSignIn() {
+    clearChallenge();
+    setMfaExpired(false);
+    setMode("signIn");
+  }
+
   return (
-    <section className="glassmorphism w-full rounded-[12px] bg-white/[0.03] px-[clamp(24px,4vw,58px)] py-[clamp(30px,4vh,48px)] shadow-[0_30px_40px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.15)]" aria-labelledby={`${id}-heading`}>
-      {methods !== null ? (
-        <div className="flex flex-col gap-m">
-          <h1 id={`${id}-heading`} className="text-m font-semibold">{copy.mfaTitle}</h1>
-          <p role="status">{copy.mfaPending}</p>
-          <ul className="list-inside list-disc">
-            {methods.map((method) => <li key={method}>{method === "totp" ? copy.appMethod : copy.emailMethod}</li>)}
-          </ul>
-          <Button type="button" onClick={() => setMethods(null)}>{copy.back}</Button>
-        </div>
+    <section className="glassmorphism w-full rounded-[12px] bg-white/[0.03] px-[clamp(24px,4vw,58px)] py-[clamp(30px,4vh,48px)] shadow-[0_30px_40px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.15)]" data-auth-view={attempt ? (attempt.recovery ? "recovery" : attempt.method) : undefined}
+      aria-labelledby={`${id}-heading`}>
+      {attempt ? (
+        <MfaChallenge
+          key={attempt.id}
+          attempt={attempt}
+          headingId={`${id}-heading`}
+          onBack={returnToSignIn}
+          onExpired={() => {
+            clearChallenge();
+            setMfaExpired(true);
+          }}
+          onVerified={() => {
+            clearChallenge();
+            setOpening(true);
+            router.replace(`/${locale}/account`);
+          }}
+        />
+      ) : mfaExpired ? (
+        <ExpiredMfaChallenge headingId={`${id}-heading`} onBack={returnToSignIn} />
       ) : (
         <>
           <header className="mb-[clamp(28px,4.45vh,48px)] text-center">
@@ -177,11 +208,11 @@ export function AuthCard({ locale }: { locale: Locale }) {
                 <form noValidate onSubmit={(event) => void form.handleSubmit(submit)(event)} aria-busy={busy} className="flex flex-col gap-m">
                   <TextField id={`${id}-email`} label={copy.email.value} error={errors.email?.message}
                     type="email" autoComplete="email" readOnly={busy} input={form.register("email")} />
-                  <PasswordInput id={`${id}-password`} label={copy.password} errorMessage={errors.password?.message}
+                  <PasswordInput id={`${id}-password`} label={copy.password.value} errorMessage={errors.password?.message}
                     autoComplete={isSignUp ? "new-password" : "current-password"} readOnly={busy}
                     visibilityLabels={{ show: copy.show.value, hide: copy.hide.value }} {...form.register("password")} />
                   {isSignUp ? (
-                    <PasswordInput id={`${id}-confirm-password`} label={copy.confirmPassword} errorMessage={errors.confirmPassword?.message}
+                    <PasswordInput id={`${id}-confirm-password`} label={copy.confirmPassword.value} errorMessage={errors.confirmPassword?.message}
                       autoComplete="new-password" readOnly={busy} visibilityLabels={{ show: copy.show.value, hide: copy.hide.value }}
                       {...form.register("confirmPassword")} />
                   ) : (
@@ -224,10 +255,8 @@ function TextField({ id, label, error, type = "text", autoComplete, readOnly, in
   return (
     <div className="flex flex-col gap-xs">
       <label htmlFor={id} className="sr-only">{label}</label>
-      <Input id={id} type={type} autoComplete={autoComplete} readOnly={readOnly} placeholder={label}
-        aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
-        className="rounded-[8px] border border-white/40 bg-white/5 px-l py-sm focus-within:border-primary has-[input[aria-invalid=true]]:border-danger"
-        inputClassName="min-h-[24px] text-sx placeholder:text-white/75" {...input} />
+      <Input appearance="auth" id={id} type={type} autoComplete={autoComplete} readOnly={readOnly} placeholder={label}
+        aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} {...input} />
       {error && <p id={`${id}-error`} role="alert" className="text-sx text-red-200">{error}</p>}
     </div>
   );
