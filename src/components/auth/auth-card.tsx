@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useIntlayer } from "next-intlayer";
 import { useRouter } from "next/navigation";
@@ -14,8 +15,7 @@ import { authClient } from "@/lib/auth-client";
 import type { Locale } from "@/lib/locale";
 import {
   beginMfaAttempt,
-  saveMfaAttempt,
-  saveResendDeadline,
+  clearMfaAttempt,
   useMfaAttempt,
   type VerificationMethod,
 } from "./mfa-challenge-storage";
@@ -36,6 +36,7 @@ export function AuthCard({ locale }: { locale: Locale }) {
   const [mode, setMode] = useState<Mode>("signIn");
   const attempt = useMfaAttempt();
   const [mfaExpired, setMfaExpired] = useState(false);
+  const [mfaCompletion, setMfaCompletion] = useState<VerificationMethod | "recovery" | null>(null);
   const [opening, setOpening] = useState(false);
   const [retrySeconds, setRetrySeconds] = useState<number | null>(null);
 
@@ -63,6 +64,7 @@ export function AuthCard({ locale }: { locale: Locale }) {
   const form = isSignUp ? signUp : signIn;
   const { errors, isSubmitting } = form.formState;
   const busy = isSubmitting || opening;
+  const challengeView = attempt?.recovery ? "recovery" : attempt?.method;
 
   useEffect(() => {
     if (retrySeconds === null) return;
@@ -146,35 +148,37 @@ export function AuthCard({ locale }: { locale: Locale }) {
     }
   };
 
-  function clearChallenge() {
-    if (attempt) saveResendDeadline(attempt.id, 0);
-    saveMfaAttempt(null);
-  }
+  useEffect(() => {
+    if (!mfaCompletion) return;
+    clearMfaAttempt();
+    router.replace(`/${locale}/account`);
+  }, [locale, mfaCompletion, router]);
 
   function returnToSignIn() {
-    clearChallenge();
+    clearMfaAttempt();
     setMfaExpired(false);
     setMode("signIn");
   }
 
   return (
-    <AuthPanel data-auth-view={attempt ? (attempt.recovery ? "recovery" : attempt.method) : undefined}
+    <AuthPanel data-auth-view={mfaCompletion ?? challengeView}
       aria-labelledby={`${id}-heading`}>
-      {attempt ? (
+      {mfaCompletion ? (
+        <div className="flex min-h-[180px] flex-col items-center justify-center gap-m text-center" role="status">
+          <Loader2 aria-hidden="true" className="size-6 text-primary motion-safe:animate-spin" />
+          <h1 id={`${id}-heading`} className="text-m font-semibold">{copy.opening.value}</h1>
+        </div>
+      ) : attempt ? (
         <MfaChallenge
           key={attempt.id}
           attempt={attempt}
           headingId={`${id}-heading`}
           onBack={returnToSignIn}
           onExpired={() => {
-            clearChallenge();
+            clearMfaAttempt();
             setMfaExpired(true);
           }}
-          onVerified={() => {
-            clearChallenge();
-            setOpening(true);
-            router.replace(`/${locale}/account`);
-          }}
+          onVerified={() => setMfaCompletion(attempt.recovery ? "recovery" : attempt.method)}
         />
       ) : mfaExpired ? (
         <ExpiredMfaChallenge headingId={`${id}-heading`} onBack={returnToSignIn} />
@@ -184,28 +188,31 @@ export function AuthCard({ locale }: { locale: Locale }) {
             <h1 id={`${id}-heading`} className="text-lm leading-[34px] font-semibold">{isSignUp ? copy.signUpTitle : copy.signInTitle}</h1>
             <p className="mt-[10px] text-s font-light text-white/80">{isSignUp ? copy.signUpSubtitle : copy.signInSubtitle}</p>
           </header>
-          <div role="tablist" aria-label={copy.tabs.value} className="mb-xl flex justify-center gap-[32px] border-b border-white/40">
-            {modes.map((tab) => (
-              <button
-                key={tab}
-                ref={(node) => { if (node) tabRefs.current[tab] = node; }}
-                id={`${id}-${tab}-tab`}
-                type="button"
-                role="tab"
-                aria-selected={tab === mode}
-                aria-controls={`${id}-${tab}-panel`}
-                aria-disabled={busy || undefined}
-                tabIndex={tab === mode ? 0 : -1}
-                onClick={() => selectTab(tab)}
-                onKeyDown={onTabKey}
-                className="-mb-px border-b-2 border-transparent px-m py-sm text-sx text-white/90 aria-selected:border-[#a99be8] aria-selected:text-[#a99be8] focus-visible:outline-2 focus-visible:outline-primary"
-              >
-                {copy[tab]}
-              </button>
-            ))}
+          <div role="tablist" aria-label={copy.tabs.value} data-active-tab={mode} className="stolos-auth-tab-list mb-xl border-b border-white/40">
+            <div className="stolos-auth-tab-track">
+              <span className="stolos-auth-tab-indicator" aria-hidden="true" />
+              {modes.map((tab) => (
+                <button
+                  key={tab}
+                  ref={(node) => { if (node) tabRefs.current[tab] = node; }}
+                  id={`${id}-${tab}-tab`}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === mode}
+                  aria-controls={`${id}-${tab}-panel`}
+                  aria-disabled={busy || undefined}
+                  tabIndex={tab === mode ? 0 : -1}
+                  onClick={() => selectTab(tab)}
+                  onKeyDown={onTabKey}
+                  className="relative px-m py-sm text-sx whitespace-nowrap text-white/90 hover:text-white aria-selected:text-[#a99be8] focus-visible:outline-2 focus-visible:outline-primary motion-safe:transition-colors"
+                >
+                  {copy[tab]}
+                </button>
+              ))}
+            </div>
           </div>
           {modes.map((tab) => (
-            <div key={tab} id={`${id}-${tab}-panel`} role="tabpanel" aria-labelledby={`${id}-${tab}-tab`} hidden={tab !== mode}>
+            <div key={tab} id={`${id}-${tab}-panel`} role="tabpanel" className="stolos-auth-tab-panel" aria-labelledby={`${id}-${tab}-tab`} hidden={tab !== mode}>
               {tab === mode && (
                 <form noValidate onSubmit={(event) => void form.handleSubmit(submit)(event)} aria-busy={busy} className="flex flex-col gap-m">
                   <TextField id={`${id}-email`} label={copy.email.value} error={errors.email?.message}

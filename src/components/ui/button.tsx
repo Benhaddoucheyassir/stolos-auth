@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   cn(
     "inline-flex items-center gap-2 cursor-pointer whitespace-nowrap",
-    "rounded-md font-medium transition-all duration-200",
+    "rounded-md font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+    "motion-safe:transition-[color,background-color,box-shadow,scale] motion-safe:duration-150 motion-safe:active:scale-[0.985] motion-safe:disabled:active:scale-100 motion-safe:aria-disabled:active:scale-100",
     "disabled:opacity-30 disabled:cursor-not-allowed",
   ),
   {
@@ -20,7 +21,7 @@ const buttonVariants = cva(
         ghostLight: "text-primary hover:text-white",
         ghostMedium: "text-[#C1B9EA] hover:text-white",
         ghostDark: "text-primary-200 hover:text-white",
-        primary: "bg-primary-400",
+        primary: "bg-primary-400 hover:bg-[#6b5cc0] disabled:hover:bg-primary-400 aria-disabled:hover:bg-primary-400",
         danger:
           "rounded-sm bg-danger-100 px-4 py-3 font-normal text-danger transition-none hover:bg-danger-500 hover:text-white",
       },
@@ -89,7 +90,7 @@ const Button = React.forwardRef<HTMLButtonElement, IButtonProps>(
       </Slot>
     ) : (
       <button className={classes} ref={ref} disabled={isDisabled} {...props}>
-        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+        {isLoading && <Loader2 className="h-4 w-4 motion-safe:animate-spin" />}
         {children}
       </button>
     );

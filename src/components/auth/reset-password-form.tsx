@@ -11,14 +11,13 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 import type { Locale } from "@/lib/locale";
 import { AuthPanel } from "./auth-panel";
-import { saveMfaAttempt, useMfaAttempt, saveResendDeadline } from "./mfa-challenge-storage";
+import { clearMfaAttempt } from "./mfa-challenge-storage";
 import { saveResetConfirmation } from "./reset-request-storage";
 
 const returnLink = "self-center text-sx text-[#bdb2ec] hover:text-white focus-visible:outline-2 focus-visible:outline-primary";
 
 export function ResetPasswordForm({ locale, token }: { locale: Locale; token: string | null }) {
   const copy = useIntlayer("password-reset");
-  const attempt = useMfaAttempt();
   const id = useId();
   const inFlight = useRef(false);
   const [invalid, setInvalid] = useState(token === null);
@@ -54,8 +53,7 @@ export function ResetPasswordForm({ locale, token }: { locale: Locale; token: st
         setSaved(true);
         form.reset();
         saveResetConfirmation(null);
-        if (attempt) saveResendDeadline(attempt.id, 0);
-        saveMfaAttempt(null);
+        clearMfaAttempt();
         window.location.replace(`/${locale}/login`);
       }
     } catch {

@@ -34,14 +34,23 @@ function readChallenge() {
   }
 }
 
-export function useMfaAttempt() {
-  const serialized = useSyncExternalStore(subscribe, readChallenge, () => null);
+function parseAttempt(serialized: string | null) {
   if (!serialized) return null;
   try {
     return challengeSchema.safeParse(JSON.parse(serialized)).data ?? null;
   } catch {
     return null;
   }
+}
+
+export function useMfaAttempt() {
+  return parseAttempt(useSyncExternalStore(subscribe, readChallenge, () => null));
+}
+
+export function clearMfaAttempt() {
+  const attempt = parseAttempt(readChallenge());
+  if (attempt) saveResendDeadline(attempt.id, 0);
+  saveMfaAttempt(null);
 }
 
 export function saveMfaAttempt(attempt: MfaAttempt | null) {

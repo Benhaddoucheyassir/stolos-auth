@@ -1,21 +1,21 @@
 # Stolos — authentication exercise
 
-Starter for the front-end exercise. The back end is ready: you build the screens from the Figma file on top of it.
-
-Stack: Next.js (App Router), Better Auth, Prisma + PostgreSQL, Tailwind. `react-hook-form` and `@tanstack/react-query` are installed.
+Stolos implements bilingual sign-in, registration, two-factor verification, password reset, and sign-out using Next.js, Better Auth, Prisma, PostgreSQL, Tailwind, and Intlayer. The interface uses React Hook Form, Zod, and TanStack Query.
 
 ## Setup
 
-Requires [Bun](https://bun.sh) and Docker.
+Install [Bun](https://bun.sh) and start Docker with Docker Compose available. From the repository root:
 
-```bash
+```sh
 bun install
 cp .env.example .env
-bun run db:setup   # starts Postgres on port 5433, applies migrations, creates the test accounts
+bun run db:setup
 bun run dev
 ```
 
-`bun run db:seed` puts the test accounts back in their initial state at any time.
+On Windows PowerShell, `Copy-Item .env.example .env` also copies the environment file. The setup command starts PostgreSQL on port 5433, applies migrations, generates the Prisma client, and seeds the test accounts. Open the URL printed by Next.js, normally `http://localhost:3000`. If you use a different origin, set `BETTER_AUTH_URL` in `.env` to match it before starting the server.
+
+Run `bun run db:seed` to restore the seeded passwords after a password reset or replenish used recovery codes.
 
 ## What is provided
 
@@ -26,24 +26,24 @@ bun run dev
 | `src/app/api/auth/[...all]/route.ts` | All auth endpoints, under `/api/auth` |
 | `src/app/code/page.tsx` | The `/code` helper page (see below) |
 | `src/app/globals.css` | Stolos design tokens (colors, text sizes, spacing, radii) and the `glassmorphism` utility |
-| `src/components/ui/` | `Button`, `Input`, `PasswordInput`, copied from the Stolos web app |
-| `src/components/sectors/` | Company sectors from the Stolos web app: list, colours and icons (`sectors.ts`) and the `SectorTag` component. Sector names are not translated: that is part of the exercise. The rest of the company card is yours to build. |
+| `src/components/ui/` | `Button`, `Input`, `PasswordInput`, adapted from the Stolos web app |
+| `src/components/sectors/` | Company sectors from the Stolos web app: list, colours and icons (`sectors.ts`) and the `SectorTag` component. Translated labels come from Intlayer dictionaries. |
 | `src/components/company/company-status.ts` | Company statuses from the Stolos web app (`CompanyStatus`) |
-| `src/app/page.tsx` | Start page: preview of these building blocks, to replace with your screens |
 
 The tokens redefine part of Tailwind's scale: `text-xs` … `text-xl` follow the Stolos sizes, and the spacing names (`xs`, `s`, `sm`, `m`, `l`, `xl`, `2xl`, `3xl`, `4xl`) also apply to sizing utilities, so `max-w-xl` is 1.5rem. Use explicit values such as `max-w-[36rem]` for widths.
-
-No real email is sent and no authenticator app is needed. Open **`/code`** in another tab: for every account it shows the current authenticator code, the last code "sent by email", the recovery codes and the last password-reset link.
 
 ## Routes
 
 | Path | What it is |
 |---|---|
-| `/` | Start page: preview of the provided building blocks. Replace it with your screens. |
-| `/code` | Helper page: codes, recovery codes and reset links of every account (see above). |
-| `/api/auth/*` | Auth endpoints served by Better Auth, listed below. |
-
-No other page exists yet: sign-in, sign-up, verification and password-reset pages are yours to create, at the paths you choose.
+| `/`, `/login` | Redirect to `/fr/login`. |
+| `/fr/login`, `/en/login` | Sign-in and registration tabs, with in-card MFA when required. |
+| `/[locale]/forgot-password`, `/[locale]/reset-password` | Request and complete a password reset in French or English. |
+| `/[locale]/account` | Signed-in page with localized sign-out. |
+| `/code` | Simulated mailbox and authenticator. |
+| `/email`, `/en/email`, `/fr/email` | Password reset email preview. The bare route defaults to French and accepts `?locale=en`. |
+| `/api/company-cards` | Server-provided company cards for the auth backdrop. |
+| `/api/auth/*` | Better Auth endpoints listed below. |
 
 | Method | Path | Action |
 |---|---|---|
@@ -71,6 +71,12 @@ Password for all of them: `Stolos-Test-2026`
 | `email@example.com` | email code |
 
 Every account with a second step also has recovery codes.
+
+### Simulated mailbox and email preview
+
+Keep `/code` open in another tab. It displays each account’s current authenticator code, latest email code, recovery codes, and latest password-reset link. Email delivery and authenticator codes are simulated locally.
+
+For password reset, request a link from the login screen and open the account’s reset link on `/code`. In development, you can also open `/email`, select the seeded account, and open its latest live link from the rendered email. The account page’s **Sign out** button returns you to login for the current locale.
 
 ## Auth API
 

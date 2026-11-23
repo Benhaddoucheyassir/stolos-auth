@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { useIntlayer } from "next-intlayer/server";
 import { Suspense, use } from "react";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { auth } from "@/lib/auth";
 import { isLocale, type Locale } from "@/lib/locale";
 
@@ -27,6 +28,7 @@ async function SignedIn({ locale, heading }: { locale: Locale; heading: string }
     <section className="glassmorphism flex flex-col gap-s rounded-m p-xl">
       <h1 className="text-m font-semibold">{heading}</h1>
       <p>{session.user.email}</p>
+      <SignOutButton locale={locale} />
     </section>
   );
 }

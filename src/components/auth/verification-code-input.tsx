@@ -36,10 +36,28 @@ export function VerificationCodeInput({
     }
   }
 
-  function enter(index: number, value: string) {
+  function animatePaste() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    inputs.current.forEach((input, index) => {
+      input?.animate?.([
+        { transform: "translateY(2px) scale(0.93)", opacity: 0.75 },
+        { transform: "translateY(0) scale(1.035)", offset: 0.62 },
+        { transform: "translateY(0) scale(1)", opacity: 1 },
+      ], {
+        delay: index * 28,
+        duration: 190,
+        easing: "ease-out",
+        fill: "backwards",
+      });
+    });
+  }
+
+  function enter(index: number, value: string, pasted = false) {
     if (readOnly) return;
     if (/^\d{6}$/.test(value)) {
-      update(value.split(""));
+      const next = value.split("");
+      if (pasted && next.some((digit, position) => digit !== digits[position])) animatePaste();
+      update(next);
       inputs.current[length - 1]?.focus();
       return;
     }
@@ -76,14 +94,14 @@ export function VerificationCodeInput({
           readOnly={readOnly}
           value={digit}
           placeholder="0"
-          className="h-[clamp(55px,8vh,80px)] w-[clamp(29px,6vw,52px)] min-w-0 rounded-[4px] border border-white/60 bg-white/5 text-center text-l font-semibold placeholder:text-white/25 focus-visible:outline-2 focus-visible:outline-primary aria-invalid:border-danger"
+          className="h-[clamp(55px,8vh,80px)] w-[clamp(29px,6vw,52px)] min-w-0 rounded-[4px] border border-white/60 bg-white/5 text-center text-l font-semibold placeholder:text-white/25 hover:bg-white/[0.08] focus-visible:bg-white/10 motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-primary aria-invalid:border-danger"
           onFocus={(event) => event.currentTarget.select()}
           onKeyDown={(event) => onKey(index, event)}
           onChange={(event) => enter(index, event.currentTarget.value)}
           onPaste={(event) => {
             event.preventDefault();
             const pasted = event.clipboardData.getData("text").trim();
-            if (/^(?:\d|\d{6})$/.test(pasted)) enter(index, pasted);
+            if (/^(?:\d|\d{6})$/.test(pasted)) enter(index, pasted, true);
           }}
         />
       ))}
