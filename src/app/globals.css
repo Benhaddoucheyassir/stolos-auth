@@ -15,6 +15,14 @@
     background: var(--app-background);
     letter-spacing: -0.02em;
   }
+
+  input:-webkit-autofill {
+    /* Keep the glass surface visible beneath Chrome's autofill paint. */
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: #fff;
+    caret-color: #fff;
+  }
 }
 
 @theme {

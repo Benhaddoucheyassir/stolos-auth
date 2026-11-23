@@ -1,18 +1,15 @@
-import { useIntlayer } from "next-intlayer/server";
-import { use } from "react";
 import { notFound } from "next/navigation";
-import { CompanyCards } from "@/components/company/company-cards";
+import { AuthCard } from "@/components/auth/auth-card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { isLocale } from "@/lib/locale";
 
-export default function LoginPage({ params }: PageProps<"/[locale]/login">) {
-  const { locale } = use(params);
+export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const copy = useIntlayer("login", locale);
 
   return (
-    <main className="mx-auto flex w-full max-w-[72rem] flex-col gap-3xl p-xl">
-      <h1 className="text-xl font-semibold">{copy.title}</h1>
-      <CompanyCards locale={locale} />
-    </main>
+    <AuthShell locale={locale}>
+      <AuthCard locale={locale} />
+    </AuthShell>
   );
 }

@@ -3,7 +3,7 @@ import { use } from "react";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/lib/locale";
 
-export default function EmailPage({ params }: PageProps<"/[locale]/email">) {
+export default function EmailPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   if (!isLocale(locale)) notFound();
   const copy = useIntlayer("reset-email", locale);

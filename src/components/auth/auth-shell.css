@@ -1,0 +1,69 @@
+.stolos-auth-shell {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  justify-items: center;
+  align-items: start;
+  overflow: clip;
+  padding: clamp(32px, calc(32.22svh - 254px), 94px) 1rem 3rem;
+  background: #1c1835;
+  letter-spacing: normal;
+}
+
+.stolos-auth-shell::before,
+.stolos-auth-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+.stolos-auth-shell::before {
+  top: -432px;
+  left: 50%;
+  width: min(1410px, 110vw);
+  height: 889px;
+  transform: translateX(-50%);
+  background-image: url("/auth/glow-top.svg");
+}
+
+.stolos-auth-shell::after {
+  inset: 50.38% 0.67% -55.13%;
+  background-image: url("/auth/glow-bottom.svg");
+}
+
+.stolos-auth-foreground {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 595px);
+  justify-items: center;
+  gap: clamp(28px, calc(20svh - 156px), 60px);
+}
+
+.stolos-auth-logo {
+  display: block;
+  width: clamp(112px, calc(20svh - 36px), 169px);
+  height: auto;
+}
+
+.stolos-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stolos-auth-backdrop button {
+  pointer-events: auto;
+}
+
+@media (max-width: 64rem) {
+  .stolos-auth-backdrop {
+    display: none;
+  }
+}

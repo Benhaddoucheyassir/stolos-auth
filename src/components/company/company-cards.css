@@ -1,0 +1,68 @@
+.stolos-company-list {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stolos-company-card {
+  position: absolute;
+  left: var(--card-x);
+  top: var(--card-y);
+  width: 552px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 30%);
+  box-shadow: 0 0 30px 2px rgb(255 255 255 / 15%);
+  opacity: 0.3;
+}
+
+.stolos-company-card[data-company="left-top"] {
+  --card-x: -136px;
+  --card-y: 57px;
+}
+
+.stolos-company-card[data-company="left-middle"] {
+  --card-x: -114px;
+  --card-y: calc(40% + 155px);
+}
+
+.stolos-company-card[data-company="left-bottom"] {
+  --card-x: -207px;
+  --card-y: calc(60% + 208px);
+}
+
+.stolos-company-card[data-company="right-top"] {
+  --card-x: calc(60% + 333px);
+  --card-y: 66px;
+}
+
+.stolos-company-card[data-company="right-middle"] {
+  --card-x: calc(80% - 12px);
+  --card-y: calc(40% + 167px);
+}
+
+.stolos-company-card[data-company="right-bottom"] {
+  --card-x: calc(80% + 103px);
+  --card-y: calc(60% + 199px);
+}
+
+.stolos-company-watermark {
+  position: absolute;
+  top: -92px;
+  left: -94px;
+  opacity: 0.14;
+}
+
+.stolos-company-content {
+  position: relative;
+  padding: 18px;
+}
+
+.stolos-company-feedback {
+  position: absolute;
+  inset-inline-start: 2rem;
+  inset-block-end: 2rem;
+}

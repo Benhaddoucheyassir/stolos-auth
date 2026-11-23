@@ -2,44 +2,31 @@ import "server-only";
 import type { CompanyCard } from "@/components/company/company-card";
 import type { Locale } from "./locale";
 
-const companies: readonly (Omit<CompanyCard, "description"> & {
-  description: Record<Locale, string>;
-})[] = [
-  {
-    id: "sillage",
-    name: "Sillage",
-    description: {
-      en: "Route planning software for urban fleets.",
-      fr: "Logiciel de planification d’itinéraires pour les flottes urbaines.",
-    },
-    sectors: ["SOFTWARE", "TRANSPORT"],
-    status: "ACTIVE",
+// The design repeats the same company fixture across the backdrop.
+const company = {
+  name: "Doctolib",
+  description: {
+    en: "Digital platform for booking medical appointments and managing consultations",
+    fr: "Plateforme numérique facilitant la prise de rendez-vous médicaux et la gestion des consultations",
   },
-  {
-    id: "solstice",
-    name: "Solstice",
-    description: {
-      en: "Solar charging stations for shared vehicles.",
-      fr: "Bornes de recharge solaire pour les véhicules partagés.",
-    },
-    sectors: ["ENERGY", "ECOLOGY"],
-    status: "ACQUIRED",
-  },
-  {
-    id: "atlas",
-    name: "Atlas",
-    description: {
-      en: "Cargo bikes and equipment for local deliveries.",
-      fr: "Vélos cargos et équipements pour la livraison de proximité.",
-    },
-    sectors: ["TRANSPORT", "INDUSTRY"],
-    status: "CLOSED",
-  },
-];
+  sectors: ["HEALTHCARE", "SOFTWARE", "ARTIFICIAL_INTELLIGENCE"],
+} as const;
+
+const instances = [
+  { id: "left-top", status: "CLOSED" },
+  { id: "left-middle", status: "ACTIVE" },
+  { id: "left-bottom", status: "ACQUIRED" },
+  { id: "right-top", status: "CLOSED" },
+  { id: "right-middle", status: "CLOSED" },
+  { id: "right-bottom", status: "CLOSED" },
+] satisfies Pick<CompanyCard, "id" | "status">[];
 
 export function getCompanyCards(locale: Locale): CompanyCard[] {
-  return companies.map(({ description, ...company }) => ({
-    ...company,
-    description: description[locale],
+  return instances.map(({ id, status }) => ({
+    id,
+    name: company.name,
+    description: company.description[locale],
+    sectors: company.sectors,
+    status,
   }));
 }

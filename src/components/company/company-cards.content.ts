@@ -10,10 +10,10 @@ export default {
     error: t({ en: "Companies are currently unavailable.", fr: "Les entreprises sont actuellement indisponibles." }),
     retry: t({ en: "Retry", fr: "Réessayer" }),
     sectors: {
-      ARTIFICIAL_INTELLIGENCE: t({ en: "Artificial intelligence", fr: "Intelligence artificielle" }),
+      ARTIFICIAL_INTELLIGENCE: t({ en: "Artificial intelligence", fr: "IA" }),
       ECOLOGY: t({ en: "Ecology", fr: "Écologie" }),
       FINANCE: t({ en: "Finance", fr: "Finance" }),
-      SOFTWARE: t({ en: "Software", fr: "Logiciels" }),
+      SOFTWARE: t({ en: "Software", fr: "Logiciel" }),
       SPACE: t({ en: "Space", fr: "Spatial" }),
       HEALTHCARE: t({ en: "Healthcare", fr: "Santé" }),
       INDUSTRY: t({ en: "Industry", fr: "Industrie" }),
