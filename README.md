@@ -2,6 +2,18 @@
 
 Stolos implements bilingual sign-in, registration, two-factor verification, password reset, and sign-out using Next.js, Better Auth, Prisma, PostgreSQL, Tailwind, and Intlayer. The interface uses React Hook Form, Zod, and TanStack Query.
 
+## Live Preview (Vercel)
+
+- [Application](https://stolos-auth.vercel.app)
+- [Simulated Mailbox & TOTP Codes](https://stolos-auth.vercel.app/code)
+- [Password-Reset Email Preview](https://stolos-auth.vercel.app/email)
+
+Use the canonical domain `https://stolos-auth.vercel.app` so the browser origin matches `BETTER_AUTH_URL` for Better Auth's origin checks. Avoid deployment-specific `.vercel.app` preview URLs.
+
+> **Security Warning**
+>
+> The `/code` and `/email` routes are enabled via `ENABLE_DEV_MAILBOX=true` and expose live TOTP codes, single-use recovery codes, email OTPs, and password-reset tokens directly in the browser. **Never enable or expose these routes in a real production environment.** They are active on this hosted preview strictly so evaluators can test all MFA and password-reset flows without external SMTP or authenticator app setup.
+
 ## Setup
 
 Install [Bun](https://bun.sh) and start Docker with Docker Compose available. From the repository root:
@@ -40,8 +52,8 @@ The tokens redefine part of Tailwind's scale: `text-xs` … `text-xl` follow the
 | `/fr/login`, `/en/login` | Sign-in and registration tabs, with in-card MFA when required. |
 | `/[locale]/forgot-password`, `/[locale]/reset-password` | Request and complete a password reset in French or English. |
 | `/[locale]/account` | Signed-in page with localized sign-out. |
-| `/code` | Simulated mailbox and authenticator. |
-| `/email`, `/en/email`, `/fr/email` | Password reset email preview. The bare route defaults to French and accepts `?locale=en`. |
+| `/code` | Simulated mailbox and authenticator. Evaluation only. Never enable in production. |
+| `/email`, `/en/email`, `/fr/email` | Password reset email preview. The bare route defaults to French and accepts `?locale=en`. Evaluation only. Never enable in production. |
 | `/api/company-cards` | Server-provided company cards for the auth backdrop. |
 | `/api/auth/*` | Better Auth endpoints listed below. |
 
@@ -73,6 +85,8 @@ Password for all of them: `Stolos-Test-2026`
 Every account with a second step also has recovery codes.
 
 ### Simulated mailbox and email preview
+
+The `/code` and `/email` routes are evaluation helpers only. Never enable them in production.
 
 Keep `/code` open in another tab. It displays each account’s current authenticator code, latest email code, recovery codes, and latest password-reset link. Email delivery and authenticator codes are simulated locally.
 
